@@ -6,7 +6,7 @@ def match(buy, sell):
         found = False
         for k in range(len(sell)):
             if buy.iloc[i]['Change Left'] == -sell.iloc[k]['Change']:
-                buy.iloc[i]['With'].append(sell.iloc[k]['Symbol'])
+                buy.iloc[i]['With'].append((sell.iloc[k]['Symbol'], int(buy.iloc[i]['Change Left'])))
                 buy.at[i, 'Change Left'] = 0
                 sell = sell.drop(k)
                 break
@@ -30,11 +30,11 @@ def groupMatch(buy, sell):
 def bucket(buy, sell):
     max_buy, max_sell = max(buy['Change Left']), -min(sell['Change'])
     if max_buy > max_sell:
-        buy.iloc[0]['With'].append(sell.iloc[0]['Symbol'])
+        buy.iloc[0]['With'].append((sell.iloc[0]['Symbol'], -int(sell.iloc[0]['Change'])))
         buy.at[0, 'Change Left'] = max_buy - max_sell
         sell = sell.drop(0)
     else:
-        buy.iloc[0]['With'].append(sell.iloc[0]['Symbol'])
+        buy.iloc[0]['With'].append((sell.iloc[0]['Symbol'], int(buy.iloc[0]['Change Left'])))
         buy.at[0, 'Change Left'] = 0
         sell.at[0, 'Change'] = max_buy - max_sell
     return buy.sort_values(by='Change Left', ascending=False).reset_index(drop=True), sell.sort_values(by='Change', ascending=True).reset_index(drop=True)
@@ -60,8 +60,9 @@ def opt(buy, sell):
         if(len(sell) == 0):
             break
         buy, sell = bucket(buy, sell)
-    print(buy)
 
 if __name__ == '__main__':
     buy, sell = setup()
+    print(buy.sort_values(by='Symbol'))
     opt(buy, sell)
+    print(buy.sort_values(by='Symbol'))
